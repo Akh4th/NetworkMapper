@@ -7,8 +7,6 @@ global record
 record = input("Would you like to record the scanning ?\n[Yes/No] : ")
 if record.upper() == "YES":
     record = True
-elif record.upper() == "NO":
-    record = False
 else:
     record = False
 
