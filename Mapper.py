@@ -47,6 +47,32 @@ def ver(host, ser):
         print(c("ERROR WHILE CHECKING VERSION. ", "red") + c(f"ERROR CODE : {e}", "yellow"))
 
 
+def scan(a, b, IP):
+    for i in range(a, b + 1):
+        amount = b - a + 1
+        per = (int(i) * 100) / int(amount)
+        long = time.time() - tim
+        soc = socket(AF_INET, SOCK_STREAM)
+        con = soc.connect_ex((IP, i))
+        if con == 0:
+            res[i] = socket1.getservbyport(i, "tcp")
+            if record:
+                rec2(i, socket1.getservbyport(i, "tcp"))
+        print("\r" + c(str(i) + "/" + str(amount), "green") + "\t\t" + c(str(round(per, 2)) + "%\t\t", "blue") + c(str(format(round(long, 2)) + "s\t\t", ), "yellow"), end=" ")
+    soc.close()
+    ends()
+
+
+def ends():
+    print(c("\n\nSCAN IS OVER, ", "red") + c(len(res), "yellow") + c(" PORTS WERE FOUND !\n", "red"))
+    time.sleep(2)
+    res1 = res.items()
+    for item in res1:
+        port, serv = item
+        print("The service " + c(serv, "red") + " is active, port : " + c(port, "red"))
+        ver(ip, port)
+
+
 try:
     ip = input("\nEnter the " + c("IP Address", "red") + " you'd like to scan : ")
     # Getting only legit values
@@ -70,25 +96,7 @@ try:
                 rec()
             print("\nScanning the target " + c(ip, "red") + " in range of " + c(str(portA) + "-" + str(portB) + "\n", "blue"))
             print(c("PORTS\t\t", "green") + c("PROCESS\t\t", "blue") + c("DURATION\t\t", "yellow"))
-            for i in range(portA, portB + 1):
-                amount = portB - portA + 1
-                per = (int(i) * 100) / int(amount)
-                long = time.time() - tim
-                soc = socket(AF_INET, SOCK_STREAM)
-                con = soc.connect_ex((ip, i))
-                if con == 0:
-                    res[i] = socket1.getservbyport(i, "tcp")
-                    if record:
-                        rec2(i, socket1.getservbyport(i, "tcp"))
-                print("\r" + c(str(i) + "/" + str(amount), "green") + "\t\t" + c(str(round(per, 2)) + "%\t\t", "blue") + c(str(format(round(long, 2)) + "s\t\t", ), "yellow"), end=" ")
-                soc.close()
-            res1 = res.items()
-            print(c("\n\nSCAN IS OVER, ", "red") + c(len(res), "yellow") + c(" PORTS WERE FOUND !\n", "red"))
-            time.sleep(1)
-            for item in res1:
-                port, serv = item
-                print("The service " + c(serv, "red") + " is active, port : " + c(port, "red"))
-                ver(ip, port)
+            scan(portA, portB, ip)
     except ValueError:
         print(c("The IP Address is not responding.\nPlease try again.\n", "red"))
 except KeyboardInterrupt:
