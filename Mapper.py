@@ -3,21 +3,17 @@ import socket as socket1
 import time
 from termcolor import colored as c
 import ipaddress
-global record
 
+
+# Global Settings
+global record
+res = {}
 # Determine weather to create a log file or not
 record = input("Would you like to record the scanning ?" + c("\n[Yes/No] : ", "red"))
 if record.upper() == "YES" or record == 1:
     record = True
 else:
     record = False
-
-
-# Writing every open port in the log file
-def rec2(number):
-    file = open('NetMap.txt', 'a')
-    file.write(f"Port number {number} is opened !")
-    file.close()
 
 
 # Creating a header to the log file
@@ -27,21 +23,30 @@ def rec():
     file.close()
 
 
+# Writing every open port in the log file
+def rec2(number, name):
+    file = open('NetMap.txt', 'a')
+    file.write(f"{name} active on port {number} !")
+    file.close()
+
+
+# Determine service version
 def ver(host, ser):
-    s = socket1.socket()
-    s.connect((host, ser))
-    if ser == 80:
-        x = "GET / HTTP/1.0\r\n\r\n"
-        s.send(x.encode())
-        print(c(f"http://{ip}/", "blue") + " - " + s.recv(1024).decode().split("\n")[1])
-    elif ser == 443:
-        print(c(f"https://{ip}/", "blue"))
-    else:
-        print(s.recv(1024).decode())
+    try:
+        s = socket1.socket()
+        s.connect((host, ser))
+        if ser == 80:
+            x = "GET / HTTP/1.0\r\n\r\n"
+            s.send(x.encode())
+            print(c(f"http://{ip}/", "blue") + " - " + s.recv(1024).decode().split("\n")[1])
+        elif ser == 443:
+            print(c(f"https://{ip}/", "blue"))
+        else:
+            print(s.recv(1024).decode())
+    except Exception as e:
+        print(c("ERROR WHILE CHECKING VERSION. ", "red") + c(f"ERROR CODE : {e}", "yellow"))
 
 
-time.sleep(1)
-res = {}
 try:
     ip = input("\nEnter the " + c("IP Address", "red") + " you'd like to scan : ")
     # Getting only legit values
@@ -59,11 +64,11 @@ try:
     # Validating IP Address for scanning
     try:
         tim = time.time()
+        # Begins the scan only when given input is a valid IP Address
         if ipaddress.ip_address(ip):
             if record:
                 rec()
-            print("\nScanning the target " + c(ip, "red") + " in range of " + c(str(portA) + "-" + str(portB) + "\n",
-                                                                              "blue"))
+            print("\nScanning the target " + c(ip, "red") + " in range of " + c(str(portA) + "-" + str(portB) + "\n", "blue"))
             print(c("PORTS\t\t", "green") + c("PROCESS\t\t", "blue") + c("DURATION\t\t", "yellow"))
             for i in range(portA, portB + 1):
                 amount = portB - portA + 1
@@ -74,9 +79,8 @@ try:
                 if con == 0:
                     res[i] = socket1.getservbyport(i, "tcp")
                     if record:
-                        rec2(i + " - " + socket1.getservbyport(i, "tcp"))
-                print("\r" + c(str(i) + "/" + str(amount), "green") + "\t\t" + c(str(per) + "%\t\t", "blue") + c(
-                    str(format(round(long, 2)) + "s\t\t", ), "yellow"), end=" ")
+                        rec2(i, socket1.getservbyport(i, "tcp"))
+                print("\r" + c(str(i) + "/" + str(amount), "green") + "\t\t" + c(str(round(per, 2)) + "%\t\t", "blue") + c(str(format(round(long, 2)) + "s\t\t", ), "yellow"), end=" ")
                 soc.close()
             res1 = res.items()
             print(c("\n\nSCAN IS OVER, ", "red") + c(len(res), "yellow") + c(" PORTS WERE FOUND !\n", "red"))
