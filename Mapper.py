@@ -1,5 +1,4 @@
 import argparse
-import socket
 import socket as s
 from socket import *
 import ipaddress
