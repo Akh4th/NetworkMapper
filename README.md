@@ -1,5 +1,5 @@
 # Port Scanner
- Run this script in order to scan ports of a host inside your network !<br/>
+ Run this script in order to scan ports of hosts inside your network !<br/>
  In case of troubles type --help or -h to get the help menu.
  
  # Examples
