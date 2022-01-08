@@ -1,105 +1,132 @@
+import argparse
+import socket
+import socket as s
 from socket import *
-import socket as socket1
-import time
-from termcolor import colored as c
 import ipaddress
 
+ports = []
 
-# Global Settings
-global record
-res = {}
-# Determine weather to create a log file or not
-record = input("Would you like to record the scanning ?" + c("\n[Yes/No] : ", "red"))
-if record.upper() == "YES" or record == 1:
-    record = True
-else:
-    record = False
+p = argparse.ArgumentParser(description="Port Scanner !\nSeparate hosts by ',' or '-' in case of ip range")
+g = p.add_mutually_exclusive_group()
 
+p.add_argument("host", help="IP Address to search", nargs='*', type=str)
+p.add_argument("-Gv", "--get_version", action="store_true", help="Get service's version")
+p.add_argument("-O", "--Output", help="Prints output into a file")
 
-# Creating a header to the log file
-def rec():
-    file = open('NetMap.txt', 'a')
-    file.write(f"Scanning started at : {tim}\nScanning the target {ip} in range of {portA}-{portB}\n")
-    file.close()
+g.add_argument("-P", "--ports", type=int, help="Ports number range, default is 1000.", default=1000)
+g.add_argument("-p", "--port", type=int, help="Specific port number.")
+
+args = p.parse_args()
 
 
-# Writing every open port in the log file
-def rec2(number, name):
-    file = open('NetMap.txt', 'a')
-    file.write(f"{name} active on port {number} !")
-    file.close()
-
-
-# Determine service version
-def ver(host, ser):
-    try:
-        s = socket1.socket()
-        s.connect((host, ser))
-        if ser == 80:
-            x = "GET / HTTP/1.0\r\n\r\n"
-            s.send(x.encode())
-            print(c(f"http://{ip}/", "blue") + " - " + s.recv(1024).decode().split("\n")[1])
-        elif ser == 443:
-            print(c(f"https://{ip}/", "blue"))
-        else:
-            print(s.recv(1024).decode())
-    except Exception as e:
-        print(c("ERROR WHILE CHECKING VERSION. ", "red") + c(f"ERROR CODE : {e}", "yellow"))
-
-
-def scan(a, b, IP):
-    for i in range(a, b + 1):
-        amount = b - a + 1
-        per = (int(i) * 100) / int(amount)
-        long = time.time() - tim
+def scans(port, IP):
+    ports.clear()
+    for i in range(port + 1):
+        per = round((i * 100) / port, 2)
+        print(f"\rChecking:\t{IP}:{i}/{port}\tProcess:\t{per}%", end="")
         soc = socket(AF_INET, SOCK_STREAM)
         con = soc.connect_ex((IP, i))
         if con == 0:
-            res[i] = socket1.getservbyport(i, "tcp")
-            if record:
-                rec2(i, socket1.getservbyport(i, "tcp"))
-        print("\r" + c(str(i) + "/" + str(amount), "green") + "\t\t" + c(str(round(per, 2)) + "%\t\t", "blue") + c(str(format(round(long, 2)) + "s\t\t", ), "yellow"), end=" ")
+            if args.get_version:
+                if args.output:
+                    with open(args.output, "w+") as file:
+                        file.write(f"Port number {i} is ON ! \nVersion : {ver(i, IP)}")
+                        file.close()
+                    ports.append(f"Port number {i} is ON ! \nVersion : {ver(i, IP)}")
+                else:
+                    ports.append(f"Port number {i} is ON ! \nVersion : {ver(i, IP)}")
+            else:
+                if args.output:
+                    with open(args.output, "w+") as file:
+                        file.write(f"Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
+                        file.close()
+                    ports.append(f"Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
+                else:
+                    ports.append(f"Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
     soc.close()
-    ends()
+    print("\n")
 
 
-def ends():
-    print(c("\n\nSCAN IS OVER, ", "red") + c(len(res), "yellow") + c(" PORTS WERE FOUND !\n", "red"))
-    time.sleep(2)
-    res1 = res.items()
-    for item in res1:
-        port, serv = item
-        print("The service " + c(serv, "red") + " is active, port : " + c(port, "red"))
-        ver(ip, port)
+def scan(port, IP):
+    soc = socket(AF_INET, SOCK_STREAM)
+    con = soc.connect_ex((IP, port))
+    if con == 0:
+        if args.get_version:
+            if args.output:
+                with open(args.output, "w+") as file:
+                    file.write(f"Port number {port} is ON ! \nVersion : {ver(service=args.port, IP=args.host)}")
+                    file.close()
+                return f"Port number {port} is ON ! \nVersion : {ver(service=args.port, IP=args.host)}"
+            else:
+                return f"Port number {port} is ON ! \nVersion : {ver(service=args.port, IP=args.host)}"
+        else:
+            if args.output:
+                with open(args.output, "w+") as file:
+                    file.write(f"Port number {port} is ON ! \nVersion : {s.getservbyport(port, 'tcp')}")
+                    file.close()
+                return f"Port number {port} is ON ! \nVersion : {s.getservbyport(port, 'tcp')}"
+            else:
+                return f"Port number {port} is ON ! \nVersion : {s.getservbyport(port, 'tcp')}"
+    else:
+        return f"Port number {port} is OFF !"
 
 
-try:
-    ip = input("\nEnter the " + c("IP Address", "red") + " you'd like to scan : ")
-    # Getting only legit values
+def ver(service, IP):
     try:
-        print("\nPlease enter ports range")
-        portA = int(input(c("Starts with : ", "blue")))
-        portB = int(input(c("Ends with : ", "yellow")))
-        while portA < 0:
-            portA = input(c("Port number has to be positive number.", "green"))
-        while portB < 0:
-            portB = input(c("Port number has to be positive number.", "green"))
-    except ValueError:
-        print(c("Port has to be a number !", "red"))
-        quit()
-    # Validating IP Address for scanning
-    try:
-        tim = time.time()
-        # Begins the scan only when given input is a valid IP Address
-        if ipaddress.ip_address(ip):
-            if record:
-                rec()
-            print("\nScanning the target " + c(ip, "red") + " in range of " + c(str(portA) + "-" + str(portB) + "\n", "blue"))
-            print(c("PORTS\t\t", "green") + c("PROCESS\t\t", "blue") + c("DURATION\t\t", "yellow"))
-            scan(portA, portB, ip)
-    except ValueError:
-        print(c("The IP Address is not responding.\nPlease try again.\n", "red"))
-except KeyboardInterrupt:
-    print("Keyboard interrupt detected !\nABORTING !!!")
-    quit()
+        x = s.socket()
+        x.connect((IP, service))
+        if service == 80:
+            y = "GET / HTTP/1.0\r\n\r\n"
+            x.send(y.encode())
+            return x.recv(1024).decode().split("\n")[0]
+        else:
+            return x.recv(1024).decode()
+    except Exception as e:
+        return f"Error while checking service number {service} \nError : {e}"
 
+
+if __name__ == "__main__":
+    try:
+        if len(args.host) == 1:
+            try:
+                ipaddress.IPv4Address(args.host[0])
+                # Single Port
+                if args.port:
+                    print(scan(port=args.port, IP=str(args.host[0])))
+                # Ports range
+                else:
+                    scans(port=args.ports, IP=str(args.host[0]))
+                    for i in ports:
+                        print(i)
+            except ipaddress.AddressValueError:
+                if "-" in args.host[0]:
+                    ranges = args.host[0].split(".")[-1:].pop().split("-")
+                    for address in range(int(ranges[0]), int(ranges[1]) + 1):
+                        ip = args.host[0].split(".")[0] + "." + args.host[0].split(".")[1] + "." + \
+                             args.host[0].split(".")[
+                                 2] + "." + str(address)
+                        if ipaddress.IPv4Address(ip):
+                            if args.port:
+                                print(scan(port=args.port, IP=ip))
+                            elif args.ports:
+                                scans(port=args.ports, IP=ip)
+                                for i in ports:
+                                    print(i)
+                        else:
+                            raise ipaddress.AddressValueError
+        elif "," in args.host:
+            for ip in args.host:
+                if ip == ",":
+                    continue
+                elif ipaddress.IPv4Address(ip):
+                    if args.port:
+                        print(scan(port=args.port, IP=ip))
+                    elif args.ports:
+                        scans(port=args.ports, IP=ip)
+                        for i in ports:
+                            print(i)
+                else:
+                    raise ipaddress.AddressValueError
+    # Wrong IP Address
+    except ValueError:
+        print("Use IP Address only !")
