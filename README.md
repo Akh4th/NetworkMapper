@@ -10,6 +10,6 @@
 --get_version, -Gv : Prints estimated services version, Example : python3 Mapper.py 10.10.11.13 --port 22 -Gv
  
  # Examples
- python Mapper.py 10.10.11.103 --ports 1200 -Gv --Output scan.txt  --verbose<br/>
- python Mapper.py 10.10.11.1-100 -P 100 -O scan.txt<br/>
- python Mapper.py 10.10.11.13 , 10.10.11.15 , 10.10.11.19 --port 22 --Output scan.txt
+ python3 Mapper.py 10.10.11.103 --ports 1200 -Gv --Output scan.txt  --verbose<br/>
+ python3 Mapper.py 10.10.11.1-100 -P 100 -O scan.txt<br/>
+ python3 Mapper.py 10.10.11.13 , 10.10.11.15 , 10.10.11.19 --port 22 --Output scan.txt
