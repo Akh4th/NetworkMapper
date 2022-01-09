@@ -130,6 +130,6 @@ if __name__ == "__main__":
                             print(i)
                 else:
                     raise ipaddress.AddressValueError
-    # Wrong IP Address
+    # Keyboard interrupt 
     except KeyboardInterrupt:
         print("Take care !")
