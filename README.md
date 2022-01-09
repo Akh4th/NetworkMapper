@@ -1,4 +1,4 @@
-# Port Scanner
+# Port Scanner (Python3 and above)
  Run this script in order to scan ports of hosts inside your network !<br/>
  In case of troubles type --help or -h to get the help menu.
 
