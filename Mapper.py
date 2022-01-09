@@ -1,71 +1,75 @@
 import argparse
+import socket
 import socket as s
 from socket import *
 import ipaddress
 
 ports = []
 
-p = argparse.ArgumentParser(description="Port Scanner !\nSeparate hosts by ',' or '-' in case of ip range")
-g = p.add_mutually_exclusive_group()
-
+# Arguments Parser
+p = argparse.ArgumentParser(description="Python Port Scanner by Akh4th !", usage="Separate hosts by ',' or '-' in case of ip range")
 p.add_argument("host", help="IP Address to search", nargs='*', type=str)
 p.add_argument("-Gv", "--get_version", action="store_true", help="Get service's version")
-p.add_argument("-O", "--Output", help="Prints output into a file")
+p.add_argument("-O", "--Output", help="Prints output into a file", metavar="")
+p.add_argument("-v", "--verbose", help="Prints process verbosely", action="store_true")
 
-g.add_argument("-P", "--ports", type=int, help="Ports number range, default is 1000.", default=1000)
-g.add_argument("-p", "--port", type=int, help="Specific port number.")
+g = p.add_mutually_exclusive_group()
+g.add_argument("-P", "--ports", type=int, help="Ports number range, default is 1000.", default=1000, metavar="")
+g.add_argument("-p", "--port", type=int, help="Specific port number.", metavar="")
 
 args = p.parse_args()
 
 
+# Scanning multiply ports
 def scans(port, IP):
     ports.clear()
     for i in range(port + 1):
         per = round((i * 100) / port, 2)
-        print(f"\rChecking:\t{IP}:{i}/{port}\tProcess:\t{per}%", end="")
+        if args.verbose:
+            print(f"\rChecking:\t{IP}:{i}/{port}\tProcess:\t{per}%", end="")
         soc = socket(AF_INET, SOCK_STREAM)
         con = soc.connect_ex((IP, i))
         if con == 0:
             if args.get_version:
-                if args.output:
-                    with open(args.output, "w+") as file:
+                if args.Output:
+                    with open(args.Output, "w+") as file:
                         file.write(f"Port number {i} is ON ! \nVersion : {ver(i, IP)}")
                         file.close()
                     ports.append(f"Port number {i} is ON ! \nVersion : {ver(i, IP)}")
                 else:
                     ports.append(f"Port number {i} is ON ! \nVersion : {ver(i, IP)}")
             else:
-                if args.output:
-                    with open(args.output, "w+") as file:
+                if args.Output:
+                    with open(args.Output, "w+") as file:
                         file.write(f"Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
                         file.close()
                     ports.append(f"Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
                 else:
                     ports.append(f"Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
-    soc.close()
     print("\n")
 
 
+# Scanning a single port
 def scan(port, IP):
     soc = socket(AF_INET, SOCK_STREAM)
     con = soc.connect_ex((IP, port))
     if con == 0:
         if args.get_version:
-            if args.output:
-                with open(args.output, "w+") as file:
-                    file.write(f"Port number {port} is ON ! \nVersion : {ver(service=args.port, IP=args.host)}")
+            if args.Output:
+                with open(args.Output, "w+") as file:
+                    file.write(f"Port number {port} is ON ! \nService Version : {ver(service=args.port, IP=args.host)}")
                     file.close()
-                return f"Port number {port} is ON ! \nVersion : {ver(service=args.port, IP=args.host)}"
+                return f"Port number {port} is ON ! \nService Version : {ver(service=args.port, IP=args.host)}"
             else:
-                return f"Port number {port} is ON ! \nVersion : {ver(service=args.port, IP=args.host)}"
+                return f"Port number {port} is ON ! \nService Version : {ver(service=args.port, IP=args.host)}"
         else:
-            if args.output:
-                with open(args.output, "w+") as file:
-                    file.write(f"Port number {port} is ON ! \nVersion : {s.getservbyport(port, 'tcp')}")
+            if args.Output:
+                with open(args.Output, "w+") as file:
+                    file.write(f"Port number {port} is ON ! \nService : {s.getservbyport(port, 'tcp')}")
                     file.close()
-                return f"Port number {port} is ON ! \nVersion : {s.getservbyport(port, 'tcp')}"
+                return f"Port number {port} is ON ! \nService : {s.getservbyport(port, 'tcp')}"
             else:
-                return f"Port number {port} is ON ! \nVersion : {s.getservbyport(port, 'tcp')}"
+                return f"Port number {port} is ON ! \nService : {s.getservbyport(port, 'tcp')}"
     else:
         return f"Port number {port} is OFF !"
 
@@ -127,5 +131,5 @@ if __name__ == "__main__":
                 else:
                     raise ipaddress.AddressValueError
     # Wrong IP Address
-    except ValueError:
-        print("Use IP Address only !")
+    except KeyboardInterrupt:
+        print("Take care !")
