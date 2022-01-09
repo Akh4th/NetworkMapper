@@ -13,7 +13,7 @@ p.add_argument("-Gv", "--get_version", action="store_true", help="Get service's 
 p.add_argument("-Ch", "--check_host", help="Ping host to check if a alive", action="store_true")
 
 g = p.add_mutually_exclusive_group()
-g.add_argument("-P", "--ports", type=int, help="Ports number range, default is 1000.", default=1000, metavar="")
+g.add_argument("-P", "--ports", type=int, help="Ports number range, default is 1000.", metavar="")
 g.add_argument("-p", "--port", type=int, help="Specific port number.", metavar="")
 
 args = p.parse_args()
@@ -24,17 +24,17 @@ def is_up(IP):
     if args.verbose:
         print(f"Checking if {IP} is alive...")
         if os.system(f"ping -c 1 {IP} > /dev/null") == 0:
-            print("Host is up !")
+            print(f"{IP} : Host is up !")
             return True
         else:
-            print("Host is down !")
+            print(f"{IP} : Host is down !")
             return False
     else:
         if os.system(f"ping -c 1 {IP} > /dev/null") == 0:
-            print("Host is up !")
+            print(f"{IP} : Host is up !")
             return True
         else:
-            print("Host is down !")
+            print(f"{IP} : Host is down !")
             return False
 
 
@@ -51,19 +51,19 @@ def scans(port, IP):
             if args.get_version:
                 if args.Output:
                     with open(args.Output, "w+") as file:
-                        file.write(f"Port number {i} is ON ! \nVersion : {ver(i, IP)}")
+                        file.write(f"{IP} : Port number {i} is ON ! \nVersion : {ver(i, IP)}")
                         file.close()
-                    ports.append(f"Port number {i} is ON ! \nVersion : {ver(i, IP)}")
+                    ports.append(f"{IP} : Port number {i} is ON ! \nVersion : {ver(i, IP)}")
                 else:
-                    ports.append(f"Port number {i} is ON ! \nVersion : {ver(i, IP)}")
+                    ports.append(f"{IP} : Port number {i} is ON ! \nVersion : {ver(i, IP)}")
             else:
                 if args.Output:
                     with open(args.Output, "w+") as file:
-                        file.write(f"Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
+                        file.write(f"{IP} : Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
                         file.close()
-                    ports.append(f"Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
+                    ports.append(f"{IP} : Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
                 else:
-                    ports.append(f"Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
+                    ports.append(f"{IP} : Port number {i} is ON ! \nService : ({s.getservbyport(i)})")
     print("\n")
 
 
@@ -75,21 +75,21 @@ def scan(port, IP):
         if args.get_version:
             if args.Output:
                 with open(args.Output, "w+") as file:
-                    file.write(f"Port number {port} is ON ! \nService Version : {ver(service=args.port, IP=args.host[0])}")
+                    file.write(f"{IP} : Port number {port} is ON ! \nService Version : {ver(service=args.port, IP=args.host[0])}")
                     file.close()
-                return f"Port number {port} is ON ! \nService Version : {ver(service=args.port, IP=args.host[0])}"
+                return f"{IP} : Port number {port} is ON ! \nService Version : {ver(service=args.port, IP=args.host[0])}"
             else:
-                return f"Port number {port} is ON ! \nService Version : {ver(service=args.port, IP=args.host[0])}"
+                return f"{IP} : Port number {port} is ON ! \nService Version : {ver(service=args.port, IP=args.host[0])}"
         else:
             if args.Output:
                 with open(args.Output, "w+") as file:
                     file.write(f"Port number {port} is ON ! \nService : {s.getservbyport(port, 'tcp')}")
                     file.close()
-                return f"Port number {port} is ON ! \nService : {s.getservbyport(port, 'tcp')}"
+                return f"{IP} : Port number {port} is ON ! \nService : {s.getservbyport(port, 'tcp')}"
             else:
-                return f"Port number {port} is ON ! \nService : {s.getservbyport(port, 'tcp')}"
+                return f"{IP} : Port number {port} is ON ! \nService : {s.getservbyport(port, 'tcp')}"
     else:
-        return f"Port number {port} is OFF !"
+        return f"{IP} : Port number {port} is OFF !"
 
 
 def ver(service, IP):
@@ -111,30 +111,33 @@ if __name__ == "__main__":
         if len(args.host) == 1:
             try:
                 ipaddress.IPv4Address(args.host[0])
-                if args.check_host:
-                    if not is_up(args.host[0]):
-                        quit()
                 # Single Port
                 if args.port:
+                    if args.check_host:
+                        if not is_up(args.host[0]):
+                            quit()
                     print(scan(port=args.port, IP=str(args.host[0])))
                 # Ports range
                 elif args.ports:
+                    if args.check_host:
+                        if not is_up(args.host[0]):
+                            quit()
                     scans(port=args.ports, IP=str(args.host[0]))
                     for i in ports:
                         print(i)
+                elif args.check_host and not args.ports and not args.port and not args.get_version and not args.Output:
+                    is_up(args.host[0])
                 else:
                     if args.verbose:
                         print("No ports range was mentioned, trying first 1000 ports.")
-                    scans(port=args.ports, IP=str(args.host[0]))
+                    scans(port=1000, IP=str(args.host[0]))
                     for i in ports:
                         print(i)
             except ipaddress.AddressValueError:
                 if "-" in args.host[0]:
                     ranges = args.host[0].split(".")[-1:].pop().split("-")
                     for address in range(int(ranges[0]), int(ranges[1]) + 1):
-                        ip = args.host[0].split(".")[0] + "." + args.host[0].split(".")[1] + "." + \
-                             args.host[0].split(".")[
-                                 2] + "." + str(address)
+                        ip = args.host[0].split(".")[0] + "." + args.host[0].split(".")[1] + "." + args.host[0].split(".")[2] + "." + str(address)
                         if args.check_host:
                             if not is_up(ip):
                                 quit()
