@@ -12,7 +12,8 @@ p.add_argument("-O", "--Output", help="Prints output into a file", metavar="")
 p.add_argument("-v", "--verbose", help="Prints process verbosely", action="store_true")
 p.add_argument("-Gv", "--get_version", action="store_true", help="Get service's version")
 p.add_argument("-Ch", "--check_host", help="Ping host to check if alive", action="store_true")
-p.add_argument("-GO", "--get_os", help="Try to get host's Operation System", action="store_true")
+p.add_argument("-GO", "--get_os", help="Estimated host's Operation System", action="store_true")
+p.add_argument("-Fs", "--fast_scan", help="Scan fewer ports then default.", action="store_true")
 
 g = p.add_mutually_exclusive_group()
 g.add_argument("-P", "--ports", type=int, help="Ports number range, default is 1000.", metavar="")
@@ -144,12 +145,40 @@ if __name__ == "__main__":
                     scans(port=args.ports, IP=str(args.host[0]))
                     for i in ports:
                         print(i)
-                elif args.check_host and not args.ports and not args.port and not args.get_version and not args.Output:
+                elif args.check_host and not args.ports and not args.port and not args.get_version and not args.Output and not args.fast_scan:
                     if args.get_os:
                         get_os(args.host[0])
                         is_up(args.host[0])
                     else:
                         is_up(args.host[0])
+                elif args.fast_scan:
+                    if args.verbose:
+                        print("Fewer port selected, scanning 400 ports !")
+                    if args.get_os:
+                        get_os(args.host[0])
+                        if args.check_host:
+                            if not is_up(args.host[0]):
+                                quit()
+                            else:
+                                scans(400, args.host[0])
+                                for i in ports:
+                                    print(i)
+                        else:
+                            scans(400, args.host[0])
+                            for i in ports:
+                                print(i)
+                    else:
+                        if args.check_host:
+                            if not is_up(args.host[0]):
+                                quit()
+                            else:
+                                scans(400, args.host[0])
+                                for i in ports:
+                                    print(i)
+                        else:
+                            scans(400, args.host[0])
+                            for i in ports:
+                                print(i)
                 else:
                     if args.verbose:
                         print("No ports range was mentioned, trying first 1000 ports.")
@@ -178,6 +207,10 @@ if __name__ == "__main__":
                                 scans(port=args.ports, IP=ip)
                                 for i in ports:
                                     print(i)
+                            elif args.fast_scan:
+                                scans(port=400, IP=ip)
+                                for i in ports:
+                                    print(i)
                         else:
                             raise ipaddress.AddressValueError
         elif "," in args.host:
@@ -196,6 +229,10 @@ if __name__ == "__main__":
                         print(scan(port=args.port, IP=ip))
                     elif args.ports:
                         scans(port=args.ports, IP=ip)
+                        for i in ports:
+                            print(i)
+                    elif args.fast_scan:
+                        scans(port=400, IP=ip)
                         for i in ports:
                             print(i)
                 else:
