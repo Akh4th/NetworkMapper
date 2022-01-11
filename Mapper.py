@@ -14,11 +14,11 @@ p.add_argument("-Gv", "--get_version", action="store_true", help="Get service's 
 p.add_argument("-Ch", "--check_host", help="Ping host to check if alive", action="store_true")
 p.add_argument("-GO", "--get_os", help="Estimated host's Operation System", action="store_true")
 p.add_argument("-Fs", "--fast_scan", help="Scan fewer ports then default.", action="store_true")
-
+# Ports group
 g = p.add_mutually_exclusive_group()
 g.add_argument("-P", "--ports", type=int, help="Ports number range, default is 1000.", metavar="")
 g.add_argument("-p", "--port", type=int, help="Specific port number.", metavar="")
-
+# Parse the arguments
 args = p.parse_args()
 
 
@@ -30,12 +30,17 @@ def get_os(IP):
             print("\rGetting Operation System..." + str(round(((i * 100) / 1000), 2)) + "%")
         try:
             x.connect((IP, i))
-            answer = x.recv(1024).decode()
+            if i == 80:
+                y = "GET / HTTP/1.0\r\n\r\n"
+                x.send(y.encode())
+                answer = x.recv(1024).decode()
+            else:
+                answer = x.recv(1024).decode()
             for name in OSs:
                 if name in answer:
                     return name
                 else:
-                    return "Unable to detect !"
+                    continue
         except OSError:
             continue
     return "Unable to detect !"
