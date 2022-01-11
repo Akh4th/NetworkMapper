@@ -37,7 +37,7 @@ def get_os(IP):
             else:
                 answer = x.recv(1024).decode()
             for name in OSs:
-                if name in answer:
+                if name.lower() in answer.lower():
                     return name
                 else:
                     continue
