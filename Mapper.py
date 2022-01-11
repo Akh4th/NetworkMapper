@@ -6,7 +6,7 @@ ports = []
 OSs = ["Ubuntu", "Unix", "Windows"]
 
 # Arguments Parser
-p = argparse.ArgumentParser(description="Python Port Scanner by Akh4th !", epilog="Host specification : ['10.0.0.1', '10.0.0.1-3', '10.0.0.1 , 10.0.0.2']", usage="Mapper.py {host specification} [--port/s PORTS] [-O output_file] [-GO] [-v] [-Gv] [-Ch]")
+p = argparse.ArgumentParser(description="Python Port Scanner by Akh4th !", epilog="Host specification : ['10.0.0.1', '10.0.0.1-3', '10.0.0.1 , 10.0.0.2']", usage="PortyPy.py {host specification} [--port/s PORTS] [-O output_file] [-GO] [-v] [-Gv] [-Ch]")
 p.add_argument("host", help="IP Address to search", nargs='*', type=str)
 p.add_argument("-O", "--Output", help="Prints output into a file", metavar="")
 p.add_argument("-v", "--verbose", help="Prints process verbosely", action="store_true")
