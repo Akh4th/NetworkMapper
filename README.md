@@ -6,7 +6,7 @@
 --port, -p : select a single port to check, Example : python3 PortyPy.py 10.10.11.13 --port 80 <br/>
 --ports, -P : select a port range to check, Example : python3 PortyPy.py 10.10.11.13 --ports 100 <br/>
 --verbose, -v : Prints the process verbosity, Example : python3 PortyPy.py 10.10.11.13 -P 100 -v <br/>
---Output, -O : Prints the output into a file, Example : python3 PortyPy.py 10.10.11.13 --ports 100 --Output 100_ports.txt <br/>
+--Output, -O : Prints the output into a file, Example : python3 PortyPy.py 10.10.11.13 --ports 100 -O 100_ports.txt <br/>
 --get_version, -Gv : Prints estimated services version, Example : python3 PortyPy.py 10.10.11.13 --port 22 -Gv <br/>
 --check_host, -Ch : Ping host to check if alive, Example : python3 PortyPy.py 10.10.11.13 --ports 100 -Ch -Gv -v <br/>
 --get_os, -GO : Trying to get host's operation system, Example : python3 PortyPy.py 10.10.11.13 -Ch -GO <br/>
