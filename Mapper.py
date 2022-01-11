@@ -150,12 +150,16 @@ if __name__ == "__main__":
                     scans(port=args.ports, IP=str(args.host[0]))
                     for i in ports:
                         print(i)
-                elif args.check_host and not args.ports and not args.port and not args.get_version and not args.Output and not args.fast_scan:
+                elif not args.ports and not args.port and not args.get_version and not args.Output and not args.fast_scan:
                     if args.get_os:
-                        get_os(args.host[0])
-                        is_up(args.host[0])
+                        if args.check_host:
+                            get_os(args.host[0])
+                            is_up(args.host[0])
+                        else:
+                            get_os(args.host[0])
                     else:
-                        is_up(args.host[0])
+                        if args.check_host:
+                            is_up(args.host[0])
                 elif args.fast_scan:
                     if args.verbose:
                         print("Fewer port selected, scanning 400 ports !")
