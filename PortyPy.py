@@ -13,11 +13,13 @@ p.add_argument("-v", "--verbose", help="Prints process verbosely", action="store
 p.add_argument("-Gv", "--get_version", action="store_true", help="Get service's version")
 p.add_argument("-Ch", "--check_host", help="Ping host to check if alive", action="store_true")
 p.add_argument("-GO", "--get_os", help="Estimated host's Operation System", action="store_true")
-p.add_argument("-Fs", "--fast_scan", help="Scan fewer ports then default.", action="store_true")
 # Ports group
-g = p.add_mutually_exclusive_group()
-g.add_argument("-P", "--ports", type=int, help="Ports number range, default is 1000.", metavar="")
-g.add_argument("-p", "--port", type=int, help="Specific port number.", metavar="")
+g = p.add_argument_group("PORTS")
+g2 = g.add_mutually_exclusive_group()
+g2.add_argument("-P", "--ports", type=int, help="Ports number range, default is 1000.", metavar="")
+g2.add_argument("-p", "--port", type=int, help="Specific port number.", metavar="")
+g.add_argument("-Fs", "--fast_scan", help="Scan fewer ports then default.", action="store_true")
+g.add_argument("-Ex", "--exclude", help="Exclude ports from scan", metavar="", type=list)
 # Parse the arguments
 args = p.parse_args()
 
@@ -26,6 +28,9 @@ args = p.parse_args()
 def get_os(IP):
     x = s.socket()
     for i in range(1000):
+        if args.exclude:
+            if i in args.exclude:
+                break
         if args.verbose:
             print("\rGetting Operation System..." + str(round(((i * 100) / 1000), 2)) + "%")
         try:
@@ -62,6 +67,9 @@ def is_up(IP):
 def scans(port, IP):
     ports.clear()
     for i in range(port + 1):
+        if args.exclude:
+            if i in args.exclude:
+                break
         per = round((i * 100) / port, 2)
         if args.verbose:
             print(f"\r{IP}:{i}/{port} processed : {per}%", end=" ")
